@@ -27,14 +27,27 @@ This project provides a sleek, responsive, and mobile-friendly web dashboard hos
 
 ---
 
-## 🛠 Hardware Requirements
-- **ESP32** or **ESP32-S3** development board.
-- **WS2812B** (NeoPixel) RGB LED or LED Strip.
-- 3.3V/5V Power supply (depending on your LED strip size).
+## 🛠 Build It Yourself (DIY Guide)
 
-**Wiring:**
-- `RGB_LED_GPIO`: Connected to GPIO 48 (Configurable in `main.c`).
-- `BOOT_BUTTON_GPIO`: Connected to GPIO 0 (Standard on most ESP32 boards).
+### Bill of Materials (BOM)
+To build this project, you will need the following components:
+1. **ESP32 Development Board**: Any standard ESP32 or ESP32-S3 board will work.
+2. **WS2812B RGB LED Strip**: Also known as NeoPixels. You can use a single LED or a strip.
+3. **Power Supply**: 
+   - If using a few LEDs, the 3.3V/5V pin from the ESP32 (via USB) is sufficient.
+   - For longer strips (e.g., > 10 LEDs), use an external 5V power supply (ensure common ground with the ESP32).
+4. **Jumper Wires**: To connect the LED to the ESP32.
+
+### Wiring Guide
+Connect the WS2812B LED strip to the ESP32 as follows:
+
+| WS2812B Pin | ESP32 Pin | Notes |
+| :--- | :--- | :--- |
+| **VCC / 5V** | `VIN` or `5V` | Use external 5V power for long strips. |
+| **GND** | `GND` | Must share common ground if using external power. |
+| **DIN (Data In)** | `GPIO 48` | Configurable in `main.c` (`RGB_LED_GPIO`). |
+
+*Optional:* The physical **BOOT** button (usually `GPIO 0` on most dev boards) is programmed to instantly turn off the LED when pressed. No extra wiring needed for this!
 
 ---
 
