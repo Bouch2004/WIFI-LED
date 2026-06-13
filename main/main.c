@@ -151,7 +151,7 @@ static void led_task(void *arg)
             led_strip_set_pixel(led_strip, 0, g_r, g_g, g_b);
             led_strip_refresh(led_strip);
         }
-        vTaskDelay(pdMS_TO_TICKS(8)); // ~120Hz update rate — snappy response
+        vTaskDelay(pdMS_TO_TICKS(20)); // ~50Hz update rate — snappy response while feeding watchdog
     }
 }
 
