@@ -1,93 +1,121 @@
-# ESP32 RGB Web Controller 🎨
+# Chroma Control — ESP32 Wi-Fi RGB Controller
 
-A lightweight, high-performance web-based RGB LED controller built specifically for the ESP32 using the native **ESP-IDF** framework. 
+A standalone Wi-Fi RGB LED controller running on the ESP32-S3 using the ESP-IDF framework. It hosts a self-contained web dashboard that lets you dial in any color on a WS2812B LED from your phone or laptop — no app install, no cloud, no internet required.
 
-This project provides a sleek, responsive, and mobile-friendly web dashboard hosted directly on the ESP32. It allows you to control a WS2812/NeoPixel RGB LED strip in real-time with zero noticeable latency, utilizing FreeRTOS tasks and hardware RMT for smooth operations.
-
-## ✨ Features
-- **Responsive Web Dashboard**: A modern, dark-themed UI with sliders for Red, Green, and Blue channels.
-- **Zero-Latency Feel**: Highly optimized HTTP handlers and a dedicated FreeRTOS LED task ensure that UI slider changes reflect instantly on the hardware.
-- **Wi-Fi Auto-Reconnect**: Robust Wi-Fi station mode handling that automatically retries connections if the signal drops.
-- **Hardware Override**: Pressing the physical BOOT button instantly turns the LED off.
-- **Configurable via Menuconfig**: Easily set your Wi-Fi SSID and Password without hardcoding them into the C source code.
+![Dashboard Screenshot](docs/images/dashboard.png)
 
 ---
 
-## 📸 Gallery
+## Features
 
-*(Replace these placeholder links with your actual screenshots)*
-
-### Web UI Dashboard
-![Web Dashboard UI](docs/images/web_ui_screenshot.png)
-*The mobile-friendly dashboard accessible via any browser on the local network.*
-
-### Hardware Setup
-![ESP32 Hardware Setup](docs/images/hardware_setup.jpg)
-*ESP32 connected to the WS2812 RGB LED.*
+- **On-device web UI** — Dark-themed glassmorphic dashboard with live color preview orb and per-channel sliders.
+- **mDNS discovery** — Access the controller at `http://chroma.local` without needing to know its IP.
+- **Dedicated LED task** — Color updates run on a separate FreeRTOS task so the HTTP server never blocks.
+- **Hardware kill switch** — Press the onboard BOOT button to instantly turn the LED off.
+- **Persistent Wi-Fi** — Infinite auto-reconnect; the device will recover on its own after a router reboot or signal drop.
+- **No hardcoded credentials** — Wi-Fi SSID and password are configured through `idf.py menuconfig`.
 
 ---
 
-## 🛠 Build It Yourself (DIY Guide)
+## Hardware
 
-### Bill of Materials (BOM)
-To build this project, you will need the following components:
-1. **ESP32 Development Board**: Any standard ESP32 or ESP32-S3 board will work.
-2. **WS2812B RGB LED Strip**: Also known as NeoPixels. You can use a single LED or a strip.
-3. **Power Supply**: 
-   - If using a few LEDs, the 3.3V/5V pin from the ESP32 (via USB) is sufficient.
-   - For longer strips (e.g., > 10 LEDs), use an external 5V power supply (ensure common ground with the ESP32).
-4. **Jumper Wires**: To connect the LED to the ESP32.
+### What you need
 
-### Wiring Guide
-Connect the WS2812B LED strip to the ESP32 as follows:
+| # | Component | Notes |
+|---|-----------|-------|
+| 1 | ESP32-S3 dev board | Any variant with USB-C works. Tested on ESP32-S3 N16R8. |
+| 2 | WS2812B LED (or strip) | Single onboard LED or external strip. |
+| 3 | USB-C cable | For flashing. Can also power 1–3 LEDs. |
+| 4 | 5V power supply | Only needed for strips longer than ~10 LEDs. |
+
+### Wiring
 
 | WS2812B Pin | ESP32 Pin | Notes |
-| :--- | :--- | :--- |
-| **VCC / 5V** | `VIN` or `5V` | Use external 5V power for long strips. |
-| **GND** | `GND` | Must share common ground if using external power. |
-| **DIN (Data In)** | `GPIO 48` | Configurable in `main.c` (`RGB_LED_GPIO`). |
+|-------------|-----------|-------|
+| VCC (5V)    | `5V` / `VIN` | Use external PSU for long strips. |
+| GND         | `GND`     | Common ground with ESP32 if using external power. |
+| DIN         | `GPIO 48` | Change `RGB_LED_GPIO` in `main.c` if your board differs. |
 
-*Optional:* The physical **BOOT** button (usually `GPIO 0` on most dev boards) is programmed to instantly turn off the LED when pressed. No extra wiring needed for this!
+> The BOOT button on `GPIO 0` is already wired on most dev boards — no extra connections needed.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-### 1. Prerequisites
-Ensure you have the Espressif IoT Development Framework ([ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/)) installed. This project requires **ESP-IDF v4.1 or newer**.
+### Prerequisites
 
-### 2. Clone the Repository
+- [ESP-IDF v5.x](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/) installed and sourced.
+
+### 1. Clone
+
 ```bash
 git clone https://github.com/Bouch2004/WIFI-LED.git
 cd WIFI-LED
 ```
 
-### 3. Configuration
-Set your Wi-Fi credentials using the ESP-IDF menuconfig tool:
+### 2. Set your Wi-Fi credentials
+
 ```bash
 idf.py menuconfig
 ```
-Navigate to **RGB Web Controller Configuration** and enter your:
-- `WiFi SSID`
-- `WiFi Password`
 
-### 4. Build and Flash
-Build the project, flash it to your ESP32, and open the serial monitor to get the IP address:
+Navigate to **RGB Web Controller Configuration** and fill in your SSID and password.
+
+### 3. Build, flash, and monitor
+
 ```bash
 idf.py build flash monitor
 ```
 
-### 5. Access the Dashboard
-Once the ESP32 boots and connects to your Wi-Fi network, it will print its IP address in the serial monitor:
-```text
-I (1234) RGB_DASHBOARD: Got IP: 192.168.1.55 — open this in your browser!
+The serial output will show the assigned IP:
+
 ```
-Type that IP address into your smartphone or computer's web browser to access the dashboard.
+I (1542) RGB_DASHBOARD: Got IP: 192.168.1.138 — open this in your browser!
+I (1543) RGB_DASHBOARD: mDNS initialized. You can now access http://chroma.local
+```
+
+### 4. Open the dashboard
+
+On any device connected to the same Wi-Fi network, open:
+
+```
+http://chroma.local
+```
+
+Or use the IP address printed in the serial log.
+
+### Standalone mode
+
+Once flashed, the ESP32 does not need a PC. Plug it into any USB charger (phone charger works fine) and it will boot, connect to Wi-Fi, and start the web server automatically.
 
 ---
 
-## 📂 Project Structure
-- `main/main.c`: Core application logic (Wi-Fi, HTTP Server, GPIO, FreeRTOS tasks).
-- `main/Kconfig.projbuild`: Custom menuconfig definitions for Wi-Fi credentials.
-- `main/idf_component.yml`: Dependency manager file (fetches `espressif/led_strip`).
-- `CMakeLists.txt`: Build system configuration.
+## Project Structure
+
+```
+├── main/
+│   ├── main.c               # Application entry point, Wi-Fi, HTTP server, LED task
+│   ├── Kconfig.projbuild     # Menuconfig definitions for Wi-Fi credentials
+│   └── idf_component.yml    # Component dependencies (led_strip, mdns)
+├── CMakeLists.txt            # Top-level build config
+└── docs/
+    └── images/
+        └── dashboard.png     # Web UI screenshot
+```
+
+---
+
+## Tech Stack
+
+- **Framework:** ESP-IDF v5.3
+- **Language:** C (gnu17)
+- **RTOS:** FreeRTOS (dual-core, SMP)
+- **LED driver:** RMT peripheral via `espressif/led_strip`
+- **Networking:** lwIP, ESP HTTP Server, mDNS
+- **Target:** ESP32-S3
+
+---
+
+## License
+
+MIT

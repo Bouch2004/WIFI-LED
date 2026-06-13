@@ -49,63 +49,57 @@ static led_strip_handle_t led_strip;
 // ===================================================================
 static const char *html_page =
 "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
-"<title>RGB Sync</title>"
+"<title>Chroma Control</title>"
 "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+"<link href='https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap' rel='stylesheet'>"
 "<style>"
-":root{--glass:rgba(255,255,255,0.08);--border:rgba(255,255,255,0.15);}"
-"*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',system-ui,sans-serif}"
-"body{background:linear-gradient(135deg,#0f172a 0%,#020617 100%);color:#f8fafc;"
-"display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px}"
-".card{background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);"
-"border:1px solid var(--border);border-radius:24px;padding:40px;width:100%;max-width:400px;"
-"box-shadow:0 25px 50px -12px rgba(0,0,0,0.5)}"
-"h1{font-size:2rem;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px;text-align:center;"
-"background:linear-gradient(to right,#fff,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}"
-"p.sub{font-size:0.9rem;color:#94a3b8;text-align:center;margin-bottom:32px}"
-".preview-container{position:relative;margin-bottom:40px;display:flex;justify-content:center}"
-".preview{width:120px;height:120px;border-radius:50%;background:#000;"
-"border:2px solid var(--border);transition:all 0.1s ease-out;position:relative;z-index:2}"
-".glow{position:absolute;width:120px;height:120px;border-radius:50%;background:#000;"
-"filter:blur(30px);opacity:0.6;transition:all 0.1s ease-out;z-index:1}"
-".row{margin-bottom:24px}"
-"label{display:flex;justify-content:space-between;font-size:0.85rem;font-weight:600;"
-"text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;color:#cbd5e1}"
-"label span{font-variant-numeric:tabular-nums;background:rgba(0,0,0,0.3);padding:2px 8px;"
-"border-radius:6px;min-width:44px;text-align:center}"
-"input[type=range]{width:100%;-webkit-appearance:none;height:8px;border-radius:4px;"
-"outline:none;cursor:pointer;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.05)}"
-"input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;"
-"border-radius:50%;cursor:pointer;border:3px solid #fff;background:#0f172a;"
-"box-shadow:0 0 10px rgba(0,0,0,0.5);transition:transform 0.1s}"
-"input[type=range]::-webkit-slider-thumb:active{transform:scale(1.1)}"
-"#rSlider::-webkit-slider-thumb{border-color:#ef4444}"
-"#gSlider::-webkit-slider-thumb{border-color:#22c55e}"
-"#bSlider::-webkit-slider-thumb{border-color:#3b82f6}"
-".btn-off{width:100%;margin-top:16px;padding:16px;border:1px solid var(--border);"
-"border-radius:14px;background:rgba(0,0,0,0.2);color:#cbd5e1;font-size:1rem;font-weight:600;"
-"cursor:pointer;transition:all 0.2s;backdrop-filter:blur(4px)}"
-".btn-off:hover{background:rgba(239,68,68,0.1);color:#ef4444;border-color:rgba(239,68,68,0.3)}"
+":root{--bg:#030712;--card:rgba(17,24,39,0.7);--border:rgba(255,255,255,0.08)}"
+"*{box-sizing:border-box;margin:0;padding:0;font-family:'Outfit',sans-serif}"
+"body{background:var(--bg);color:#f9fafb;display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden;position:relative}"
+".bg-mesh{position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 50% 50%,rgba(56,189,248,0.05) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(139,92,246,0.05) 0%,transparent 50%);z-index:0;animation:meshRotate 30s linear infinite}"
+"@keyframes meshRotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}"
+".card{position:relative;z-index:10;background:var(--card);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:32px;padding:48px 40px;width:90%;max-width:420px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.1)}"
+"h1{font-size:2.2rem;font-weight:700;text-align:center;margin-bottom:8px;background:linear-gradient(135deg,#fff 0%,#a1a1aa 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px}"
+"p.sub{font-size:0.95rem;font-weight:300;color:#9ca3af;text-align:center;margin-bottom:40px}"
+".orb-container{position:relative;width:140px;height:140px;margin:0 auto 48px;display:flex;align-items:center;justify-content:center}"
+".orb-glow{position:absolute;width:100%;height:100%;border-radius:50%;filter:blur(35px);opacity:0.5;transition:background-color 0.3s,opacity 0.3s}"
+".orb{position:relative;width:120px;height:120px;border-radius:50%;background:#000;box-shadow:inset 0 -10px 20px rgba(0,0,0,0.5),inset 0 5px 15px rgba(255,255,255,0.2),0 10px 30px rgba(0,0,0,0.5);transition:background-color 0.3s;z-index:2;border:1px solid rgba(255,255,255,0.1)}"
+".orb::after{content:'';position:absolute;top:8px;left:20px;width:40px;height:15px;background:rgba(255,255,255,0.4);border-radius:50%;filter:blur(3px);transform:rotate(-30deg)}"
+".slider-group{margin-bottom:28px}"
+".slider-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}"
+".slider-label{font-size:0.85rem;font-weight:500;color:#d1d5db;text-transform:uppercase;letter-spacing:1.5px}"
+".slider-val{font-variant-numeric:tabular-nums;font-weight:700;font-size:0.9rem;color:#fff;background:rgba(255,255,255,0.05);padding:4px 10px;border-radius:8px;min-width:48px;text-align:center;border:1px solid rgba(255,255,255,0.05)}"
+"input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:#374151;outline:none;transition:0.2s}"
+"input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.3);transition:transform 0.1s,box-shadow 0.1s}"
+"input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15);box-shadow:0 6px 15px rgba(0,0,0,0.4)}"
+"#rSlider::-webkit-slider-thumb{border:4px solid #ef4444}"
+"#gSlider::-webkit-slider-thumb{border:4px solid #10b981}"
+"#bSlider::-webkit-slider-thumb{border:4px solid #3b82f6}"
+".btn-off{display:block;width:100%;margin-top:10px;padding:18px;border:none;border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,0.05) 0%,rgba(255,255,255,0.02) 100%);color:#e5e7eb;font-size:1.05rem;font-weight:500;letter-spacing:0.5px;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05),0 4px 6px rgba(0,0,0,0.1)}"
+".btn-off:hover{background:linear-gradient(135deg,rgba(239,68,68,0.1) 0%,rgba(239,68,68,0.05) 100%);color:#ef4444;transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(239,68,68,0.2),0 8px 15px rgba(239,68,68,0.15)}"
+".btn-off:active{transform:translateY(0)}"
 "</style></head><body>"
+"<div class='bg-mesh'></div>"
 "<div class='card'>"
-"<h1>RGB Sync</h1>"
-"<p class='sub'>ESP32 Wireless Controller</p>"
-"<div class='preview-container'>"
-"  <div id='glow' class='glow'></div>"
-"  <div id='preview' class='preview'></div>"
+"<h1>Chroma Control</h1>"
+"<p class='sub'>Studio RGB Lighting</p>"
+"<div class='orb-container'>"
+"<div id='orbGlow' class='orb-glow'></div>"
+"<div id='orb' class='orb'></div>"
 "</div>"
-"<div class='row'>"
-"<label>Red <span id='rv'>0</span></label>"
+"<div class='slider-group'>"
+"<div class='slider-header'><span class='slider-label'>Red</span><span class='slider-val' id='rv'>0</span></div>"
 "<input type='range' id='rSlider' min='0' max='255' value='0'>"
 "</div>"
-"<div class='row'>"
-"<label>Green <span id='gv'>0</span></label>"
+"<div class='slider-group'>"
+"<div class='slider-header'><span class='slider-label'>Green</span><span class='slider-val' id='gv'>0</span></div>"
 "<input type='range' id='gSlider' min='0' max='255' value='0'>"
 "</div>"
-"<div class='row'>"
-"<label>Blue <span id='bv'>0</span></label>"
+"<div class='slider-group'>"
+"<div class='slider-header'><span class='slider-label'>Blue</span><span class='slider-val' id='bv'>0</span></div>"
 "<input type='range' id='bSlider' min='0' max='255' value='0'>"
 "</div>"
-"<button class='btn-off' onclick='turnOff()'>Turn Off</button>"
+"<button class='btn-off' onclick='turnOff()'>Power Off</button>"
 "</div>"
 "<script>"
 "var t={r:0,g:0,b:0},p={r:false,g:false,b:false},R=0,G=0,B=0;"
@@ -117,8 +111,8 @@ static const char *html_page =
 "  document.getElementById('gv').textContent=G;"
 "  document.getElementById('bv').textContent=B;"
 "  var col='rgb('+R+','+G+','+B+')';"
-"  document.getElementById('preview').style.background=col;"
-"  document.getElementById('glow').style.background=col;"
+"  document.getElementById('orb').style.backgroundColor=col;"
+"  document.getElementById('orbGlow').style.backgroundColor=col;"
 "  var now=Date.now();"
 "  if(now-t[ch]>30){"
 "    sendRGB(R,G,B); t[ch]=now; p[ch]=false;"
@@ -218,20 +212,30 @@ static void start_webserver(void)
 }
 
 // ===================================================================
-//  WI-FI
+//  WI-FI & mDNS
 // ===================================================================
+#include "mdns.h"
+
+static void start_mdns_service(void)
+{
+    ESP_ERROR_CHECK(mdns_init());
+    ESP_ERROR_CHECK(mdns_hostname_set("chroma"));
+    ESP_ERROR_CHECK(mdns_instance_name_set("ESP32 RGB Controller"));
+    
+    // Add mDNS service for HTTP
+    mdns_service_add(NULL, "_http", "_tcp", 80, NULL, 0);
+    ESP_LOGI(TAG, "mDNS initialized. You can now access http://chroma.local");
+}
+
 static void wifi_event_handler(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
     if (base == WIFI_EVENT && id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (base == WIFI_EVENT && id == WIFI_EVENT_STA_DISCONNECTED) {
-        if (s_retry_num < MAXIMUM_RETRY) {
-            esp_wifi_connect();
-            s_retry_num++;
-            ESP_LOGI(TAG, "Retrying Wi-Fi...");
-        } else {
-            xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
-        }
+        // Infinite retries for headless operation
+        esp_wifi_connect();
+        s_retry_num++;
+        ESP_LOGI(TAG, "Retrying Wi-Fi... (attempt %d)", s_retry_num);
     } else if (base == IP_EVENT && id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t *event = (ip_event_got_ip_t *)data;
         ESP_LOGI(TAG, "Got IP: " IPSTR " — open this in your browser!", IP2STR(&event->ip_info.ip));
@@ -352,6 +356,7 @@ void app_main(void)
         pdFALSE, pdFALSE, portMAX_DELAY);
 
     if (bits & WIFI_CONNECTED_BIT) {
+        start_mdns_service();
         start_webserver();
     } else {
         ESP_LOGE(TAG, "Wi-Fi failed. Check SSID/Password in menuconfig.");

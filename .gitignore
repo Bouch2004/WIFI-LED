@@ -17,3 +17,6 @@ sdkconfig.old
 *.o
 *.a
 *.so
+
+# Managed components (auto-downloaded by ESP-IDF)
+managed_components/
