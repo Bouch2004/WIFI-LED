@@ -112,6 +112,3 @@ Once flashed, the ESP32 does not need a PC. Plug it into any USB charger (phone 
 
 ---
 
-## License
-
-MIT
