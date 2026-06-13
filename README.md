@@ -25,8 +25,7 @@ A standalone Wi-Fi RGB LED controller running on the ESP32-S3 using the ESP-IDF 
 |---|-----------|-------|
 | 1 | ESP32-S3 dev board | Any variant with USB-C works. Tested on ESP32-S3 N16R8. |
 | 2 | WS2812B LED (or strip) | Single onboard LED or external strip. |
-| 3 | USB-C cable | For flashing. Can also power 1–3 LEDs. |
-| 4 | 5V power supply | Only needed for strips longer than ~10 LEDs. |
+| 3 | 5V power supply from pc or own supply unit | Only needed for strips longer than ~10 LEDs. |
 
 ### Wiring
 
@@ -98,9 +97,6 @@ Once flashed, the ESP32 does not need a PC. Plug it into any USB charger (phone 
 │   ├── Kconfig.projbuild     # Menuconfig definitions for Wi-Fi credentials
 │   └── idf_component.yml    # Component dependencies (led_strip, mdns)
 ├── CMakeLists.txt            # Top-level build config
-└── docs/
-    └── images/
-        └── dashboard.png     # Web UI screenshot
 ```
 
 ---
