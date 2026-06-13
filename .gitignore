@@ -1,0 +1,19 @@
+# ESP-IDF build directories
+build/
+sdkconfig
+sdkconfig.old
+
+# IDE configurations
+.vscode/
+.idea/
+.eclipse/
+
+# Python virtual environment and compiled files
+**/__pycache__/
+**/*.pyc
+.espressif/
+
+# Host binaries
+*.o
+*.a
+*.so
