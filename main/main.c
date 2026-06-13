@@ -16,15 +16,9 @@
 #include "esp_http_server.h"
 #include "led_strip.h"
 
-// ===================================================================
-//  HARDWARE DEFINES
-// ===================================================================
 #define BOOT_BUTTON_GPIO GPIO_NUM_0
 #define RGB_LED_GPIO     GPIO_NUM_48
 
-// ===================================================================
-//  WI-FI CONFIG (set via: idf.py menuconfig -> RGB Web Controller Config)
-// ===================================================================
 #define WIFI_SSID      CONFIG_ESP_WIFI_SSID
 #define WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
 #define MAXIMUM_RETRY  5
@@ -36,17 +30,13 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_FAIL_BIT      BIT1
 static int s_retry_num = 0;
 
-// ===================================================================
-//  SHARED LED STATE  (written by HTTP handler, read by LED task)
-// ===================================================================
+
 static volatile uint8_t g_r = 0, g_g = 0, g_b = 0;
 static volatile bool    g_led_dirty = false; // flag: new value pending
 
 static led_strip_handle_t led_strip;
 
-// ===================================================================
-//  HTML PAGE  (minified, stored in flash)
-// ===================================================================
+
 static const char *html_page =
 "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
 "<title>Chroma Control</title>"
@@ -134,9 +124,7 @@ static const char *html_page =
 "document.getElementById('bSlider').addEventListener('input',function(){update('b')});"
 "</script></body></html>";
 
-// ===================================================================
-//  LED UPDATE TASK  (dedicated task — never blocks HTTP server)
-// ===================================================================
+
 static void led_task(void *arg)
 {
     while (1) {
@@ -149,9 +137,7 @@ static void led_task(void *arg)
     }
 }
 
-// ===================================================================
-//  HTTP HANDLERS
-// ===================================================================
+
 
 // GET / → serve dashboard page
 esp_err_t root_handler(httpd_req_t *req)
@@ -161,7 +147,7 @@ esp_err_t root_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-// POST /api/rgb  body: "R,G,B"  e.g. "255,128,0"
+
 esp_err_t rgb_set_handler(httpd_req_t *req)
 {
     char buf[16];
@@ -169,7 +155,7 @@ esp_err_t rgb_set_handler(httpd_req_t *req)
     if (len <= 0) return ESP_FAIL;
     buf[len] = '\0';
 
-    // Fast CSV parse — no malloc, no JSON library
+   
     int r = 0, g = 0, b = 0;
     sscanf(buf, "%d,%d,%d", &r, &g, &b);
 
@@ -211,9 +197,7 @@ static void start_webserver(void)
     }
 }
 
-// ===================================================================
-//  WI-FI & mDNS
-// ===================================================================
+
 #include "mdns.h"
 
 static void start_mdns_service(void)
@@ -270,9 +254,7 @@ static void wifi_init(void)
     ESP_ERROR_CHECK(esp_wifi_start());
 }
 
-// ===================================================================
-//  BOOT BUTTON ISR  (resets LED to off when pressed)
-// ===================================================================
+
 static QueueHandle_t gpio_evt_queue;
 
 static void IRAM_ATTR gpio_isr_handler(void *arg)
@@ -299,16 +281,13 @@ static void button_task(void *arg)
             }
         }
     }
-}
+} 
 
-// ===================================================================
-//  MAIN
-// ===================================================================
 void app_main(void)
 {
     ESP_LOGI(TAG, "Booting ESP32 RGB Dashboard...");
 
-    // --- NVS (required for Wi-Fi) ---
+
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
